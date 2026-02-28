@@ -10,18 +10,18 @@
 ┌─────────────────────────────────────────────┐
 │  Header (앱 제목 + 현재위치 버튼)            │
 ├─────────────────────────────────────────────┤
-│  SearchBar (도시 검색 입력)                  │
+│  LocationSelector (지역 선택/검색)           │
 ├─────────────────────────────────────────────┤
-│  RecentSearches (최근 검색 도시 칩 목록)      │
+│  RecentSearches (최근 검색 지역 칩 목록)      │
 ├──────────────────────┬──────────────────────┤
 │                      │                      │
 │   CurrentWeather     │   WeatherDetails     │
 │   (메인 날씨 카드)    │   (상세 정보 카드)    │
 │                      │                      │
 ├──────────────────────┴──────────────────────┤
-│  ForecastChart (5일 예보 차트) [확장]         │
+│  ForecastChart (3일 예보 차트) [확장]         │
 ├─────────────────────────────────────────────┤
-│  Favorites (즐겨찾기 도시 목록)              │
+│  Favorites (즐겨찾기 지역 목록)              │
 └─────────────────────────────────────────────┘
 ```
 
@@ -42,31 +42,32 @@ WeatherDashboard/
 ├── public/
 ├── src/
 │   ├── api/
-│   │   └── weather.ts          # API 호출 함수
+│   │   └── weather.ts            # 기상청 API 호출 함수
 │   ├── components/
-│   │   ├── CurrentWeather.tsx   # 현재 날씨 카드
-│   │   ├── ErrorMessage.tsx     # 에러 표시
-│   │   ├── Favorites.tsx        # 즐겨찾기 목록
-│   │   ├── ForecastChart.tsx    # 5일 예보 차트 [확장]
-│   │   ├── Header.tsx           # 헤더
-│   │   ├── LoadingSpinner.tsx   # 로딩 표시
-│   │   ├── RecentSearches.tsx   # 최근 검색 목록
-│   │   ├── SearchBar.tsx        # 검색 입력
-│   │   └── WeatherDetails.tsx   # 상세 날씨 정보
+│   │   ├── CurrentWeather.tsx     # 현재 날씨 카드
+│   │   ├── ErrorMessage.tsx       # 에러 표시
+│   │   ├── Favorites.tsx          # 즐겨찾기 목록
+│   │   ├── ForecastChart.tsx      # 3일 예보 차트 [확장]
+│   │   ├── Header.tsx             # 헤더
+│   │   ├── LoadingSpinner.tsx     # 로딩 표시
+│   │   ├── LocationSelector.tsx   # 지역 선택/검색
+│   │   ├── RecentSearches.tsx     # 최근 검색 목록
+│   │   └── WeatherDetails.tsx     # 상세 날씨 정보
 │   ├── hooks/
-│   │   ├── useGeolocation.ts    # 현재 위치 훅 [확장]
-│   │   ├── useLocalStorage.ts   # 로컬 저장소 훅
-│   │   └── useWeather.ts        # 날씨 데이터 페칭 훅
+│   │   ├── useGeolocation.ts      # 현재 위치 훅 [확장]
+│   │   ├── useLocalStorage.ts     # 로컬 저장소 훅
+│   │   └── useWeather.ts          # 날씨 데이터 페칭 훅
 │   ├── types/
-│   │   └── weather.ts           # API 응답 타입 정의
+│   │   └── weather.ts             # API 응답 타입 정의
 │   ├── utils/
-│   │   └── debounce.ts          # 디바운스 유틸 [심화]
-│   ├── App.tsx                  # 메인 앱 컴포넌트
-│   ├── App.css                  # 앱 스타일 (Tailwind)
-│   ├── main.tsx                 # 엔트리 포인트
-│   └── vite-env.d.ts            # Vite 타입 선언
-├── .env                         # 환경변수 (API 키)
-├── .env.example                 # 환경변수 예시 (커밋용)
+│   │   ├── gridConvert.ts         # 위경도 ↔ 격자좌표 변환
+│   │   └── debounce.ts            # 디바운스 유틸 [심화]
+│   ├── App.tsx
+│   ├── App.css
+│   ├── main.tsx
+│   └── vite-env.d.ts
+├── .env
+├── .env.example
 ├── .gitignore
 ├── index.html
 ├── package.json
@@ -83,19 +84,26 @@ WeatherDashboard/
 ### 3.1 앱 상태 구조
 
 ```typescript
+// 지역 정보
+interface Location {
+  name: string;                    // 지역명
+  nx: number;                      // 격자 X
+  ny: number;                      // 격자 Y
+}
+
 // useWeather 훅 반환 상태
 interface WeatherState {
-  data: WeatherData | null;        // 날씨 데이터
-  forecast: ForecastData | null;   // 예보 데이터 [확장]
-  isLoading: boolean;              // 로딩 상태
-  error: string | null;            // 에러 메시지
+  data: CurrentWeather | null;     // 현재 날씨 데이터
+  forecast: ForecastItem[] | null; // 예보 데이터 [확장]
+  isLoading: boolean;
+  error: string | null;
 }
 
 // 로컬 저장소 상태
 interface LocalState {
-  recentSearches: string[];        // 최근 검색 도시 (최대 10개)
-  favorites: string[];             // 즐겨찾기 도시
-  lastCity: string;                // 마지막 검색 도시
+  recentSearches: Location[];      // 최근 검색 지역 (최대 10개)
+  favorites: Location[];           // 즐겨찾기 지역
+  lastLocation: Location;          // 마지막 검색 지역
 }
 ```
 
