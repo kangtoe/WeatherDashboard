@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CITIES } from './types/weather';
 import type { Location } from './types/weather';
 import { useWeather } from './hooks/useWeather';
 import { useHourlyForecast } from './hooks/useHourlyForecast';
 import { useDailyForecast } from './hooks/useDailyForecast';
 import { useTheme } from './hooks/useTheme';
+import { useGeolocation } from './hooks/useGeolocation';
 import { clearCache } from './api/weather';
 import { LocationSelector } from './components/LocationSelector';
 import { CurrentWeather } from './components/CurrentWeather';
@@ -15,10 +16,23 @@ import { ErrorMessage } from './components/ErrorMessage';
 
 function App() {
   const [location, setLocation] = useState<Location>(CITIES[0]);
+  const manuallySelected = useRef(false);
+  const { nearestCity } = useGeolocation();
   const { data, isLoading, error, refetch } = useWeather(location.nx, location.ny);
   const forecast = useHourlyForecast(location.nx, location.ny);
   const daily = useDailyForecast(location.nx, location.ny);
   const { theme, toggleTheme } = useTheme();
+
+  useEffect(() => {
+    if (nearestCity && !manuallySelected.current) {
+      setLocation(nearestCity);
+    }
+  }, [nearestCity]);
+
+  const handleLocationSelect = (loc: Location) => {
+    manuallySelected.current = true;
+    setLocation(loc);
+  };
 
   const handleRefresh = () => {
     clearCache();
@@ -79,7 +93,7 @@ function App() {
                 />
               </svg>
             </button>
-            <LocationSelector selected={location} onSelect={setLocation} />
+            <LocationSelector selected={location} onSelect={handleLocationSelect} />
           </div>
         </div>
       </header>
