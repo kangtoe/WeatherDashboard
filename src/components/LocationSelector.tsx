@@ -16,7 +16,7 @@ export function LocationSelector({ selected, onSelect }: LocationSelectorProps) 
           className={`px-4 py-2 min-h-11 rounded-full text-sm font-medium transition-colors cursor-pointer ${
             selected.name === city.name
               ? 'bg-blue-500 text-white'
-              : 'bg-white text-gray-700 hover:bg-blue-100'
+              : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-blue-100 dark:hover:bg-blue-900/30'
           }`}
         >
           {city.name}

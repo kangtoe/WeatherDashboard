@@ -8,6 +8,7 @@ import { getWindDirectionText } from '../types/weather';
 
 interface HourlyForecastProps {
   data: HourlyForecastData[];
+  theme: 'light' | 'dark';
 }
 
 type Tab = 'temperature' | 'precipitation' | 'wind';
@@ -33,10 +34,35 @@ function formatDateLabel(date: string): string {
   return `${m}/${d}`;
 }
 
-export function HourlyForecast({ data }: HourlyForecastProps) {
+const COLORS = {
+  light: {
+    grid: '#f3f4f6',
+    tick: '#9ca3af',
+    label: '#6b7280',
+    dateLine: '#d1d5db',
+    dateLabel: '#6b7280',
+    tooltipBg: '#ffffff',
+    tooltipBorder: '#e5e7eb',
+    tooltipText: '#374151',
+  },
+  dark: {
+    grid: '#374151',
+    tick: '#9ca3af',
+    label: '#d1d5db',
+    dateLine: '#6b7280',
+    dateLabel: '#9ca3af',
+    tooltipBg: '#1f2937',
+    tooltipBorder: '#374151',
+    tooltipText: '#f3f4f6',
+  },
+} as const;
+
+export function HourlyForecast({ data, theme }: HourlyForecastProps) {
   const [tab, setTab] = useState<Tab>('temperature');
 
   if (data.length === 0) return null;
+
+  const c = COLORS[theme];
 
   const chartData = data.map((item) => ({
     timeKey: `${item.date}_${item.time}`,
@@ -65,14 +91,14 @@ export function HourlyForecast({ data }: HourlyForecastProps) {
     <ReferenceLine
       key={b.timeKey}
       x={b.timeKey}
-      stroke="#d1d5db"
+      stroke={c.dateLine}
       strokeDasharray="4 4"
-      label={{ value: b.label, position: 'insideTopRight', fontSize: 10, fill: '#6b7280', fontWeight: 500 }}
+      label={{ value: b.label, position: 'insideTopRight', fontSize: 10, fill: c.dateLabel, fontWeight: 500 }}
     />
   ));
 
   return (
-    <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-6 shadow-sm">
       {/* 탭 */}
       <div className="flex gap-2 mb-4">
         {TABS.map((t) => (
@@ -82,7 +108,7 @@ export function HourlyForecast({ data }: HourlyForecastProps) {
             className={`px-4 py-2.5 sm:px-3 sm:py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer ${
               tab === t.key
                 ? 'bg-blue-500 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
             }`}
           >
             {t.label}
@@ -91,7 +117,7 @@ export function HourlyForecast({ data }: HourlyForecastProps) {
       </div>
 
       {/* 차트 */}
-      <div className="h-48 overflow-x-auto">
+      <div className="h-48 overflow-x-auto custom-scrollbar">
         <div style={{ minWidth: chartMinWidth, height: '100%' }}>
           <ResponsiveContainer width="100%" height="100%">
             {tab === 'temperature' ? (
@@ -102,11 +128,11 @@ export function HourlyForecast({ data }: HourlyForecastProps) {
                     <stop offset="100%" stopColor="#f59e0b" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={c.grid} />
                 <XAxis
                   dataKey="timeKey"
                   tickFormatter={tickFormatter}
-                  tick={{ fontSize: 11, fill: '#9ca3af' }}
+                  tick={{ fontSize: 11, fill: c.tick }}
                   axisLine={false}
                   tickLine={false}
                   interval={0}
@@ -115,7 +141,8 @@ export function HourlyForecast({ data }: HourlyForecastProps) {
                 <Tooltip
                   labelFormatter={tickFormatter}
                   formatter={(value) => [`${value}°C`, '기온']}
-                  contentStyle={{ borderRadius: '8px', fontSize: '12px' }}
+                  contentStyle={{ borderRadius: '8px', fontSize: '12px', backgroundColor: c.tooltipBg, borderColor: c.tooltipBorder, color: c.tooltipText }}
+                  labelStyle={{ color: c.tooltipText }}
                 />
                 {dateLines}
                 <Area
@@ -129,17 +156,17 @@ export function HourlyForecast({ data }: HourlyForecastProps) {
                     dataKey="temperature"
                     position="top"
                     formatter={(v) => `${v}°`}
-                    style={{ fontSize: 11, fill: '#6b7280' }}
+                    style={{ fontSize: 11, fill: c.label }}
                   />
                 </Area>
               </AreaChart>
             ) : tab === 'precipitation' ? (
               <BarChart data={chartData} margin={chartMargin}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={c.grid} />
                 <XAxis
                   dataKey="timeKey"
                   tickFormatter={tickFormatter}
-                  tick={{ fontSize: 11, fill: '#9ca3af' }}
+                  tick={{ fontSize: 11, fill: c.tick }}
                   axisLine={false}
                   tickLine={false}
                   interval={0}
@@ -148,7 +175,8 @@ export function HourlyForecast({ data }: HourlyForecastProps) {
                 <Tooltip
                   labelFormatter={tickFormatter}
                   formatter={(value) => [`${value}%`, '강수확률']}
-                  contentStyle={{ borderRadius: '8px', fontSize: '12px' }}
+                  contentStyle={{ borderRadius: '8px', fontSize: '12px', backgroundColor: c.tooltipBg, borderColor: c.tooltipBorder, color: c.tooltipText }}
+                  labelStyle={{ color: c.tooltipText }}
                 />
                 {dateLines}
                 <Bar dataKey="precipitation" fill="#3b82f6" radius={[4, 4, 0, 0]}>
@@ -156,7 +184,7 @@ export function HourlyForecast({ data }: HourlyForecastProps) {
                     dataKey="precipitation"
                     position="top"
                     formatter={(v) => `${v}%`}
-                    style={{ fontSize: 11, fill: '#6b7280' }}
+                    style={{ fontSize: 11, fill: c.label }}
                   />
                 </Bar>
               </BarChart>
@@ -168,11 +196,11 @@ export function HourlyForecast({ data }: HourlyForecastProps) {
                     <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={c.grid} />
                 <XAxis
                   dataKey="timeKey"
                   tickFormatter={tickFormatter}
-                  tick={{ fontSize: 11, fill: '#9ca3af' }}
+                  tick={{ fontSize: 11, fill: c.tick }}
                   axisLine={false}
                   tickLine={false}
                   interval={0}
@@ -181,7 +209,8 @@ export function HourlyForecast({ data }: HourlyForecastProps) {
                 <Tooltip
                   labelFormatter={tickFormatter}
                   formatter={(value) => [`${value} m/s`, '풍속']}
-                  contentStyle={{ borderRadius: '8px', fontSize: '12px' }}
+                  contentStyle={{ borderRadius: '8px', fontSize: '12px', backgroundColor: c.tooltipBg, borderColor: c.tooltipBorder, color: c.tooltipText }}
+                  labelStyle={{ color: c.tooltipText }}
                 />
                 {dateLines}
                 <Area
@@ -195,7 +224,7 @@ export function HourlyForecast({ data }: HourlyForecastProps) {
                     dataKey="windSpeed"
                     position="top"
                     formatter={(v) => `${v}`}
-                    style={{ fontSize: 11, fill: '#6b7280' }}
+                    style={{ fontSize: 11, fill: c.label }}
                   />
                 </Area>
               </AreaChart>

@@ -32,24 +32,24 @@ export function DailyForecast({ data }: DailyForecastProps) {
   const today = getTodayStr();
 
   return (
-    <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm">
-      <h3 className="text-sm font-medium text-gray-500 mb-3 sm:mb-4">일별 예보</h3>
-      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:pb-0 sm:overflow-x-visible">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-6 shadow-sm">
+      <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3 sm:mb-4">일별 예보</h3>
+      <div className="flex gap-3 overflow-x-auto custom-scrollbar pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:pb-0 sm:overflow-x-visible">
         {data.map((day) => (
           <div
             key={day.date}
             className={`min-w-20 flex-shrink-0 sm:flex-1 sm:min-w-0 sm:flex-shrink flex flex-col items-center gap-2 rounded-xl p-3 sm:p-4 ${
-              day.date === today ? 'bg-blue-50' : 'bg-gray-50'
+              day.date === today ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-gray-100 dark:bg-gray-700'
             }`}
           >
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
               {day.date === today ? '오늘' : `${day.dayOfWeek}요일`}
             </span>
             <span className="text-3xl">{getWeatherIcon(day.sky, day.precipitationType)}</span>
-            <span className="text-xs text-gray-500">{getWeatherText(day.sky, day.precipitationType)}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">{getWeatherText(day.sky, day.precipitationType)}</span>
             <div className="flex items-baseline gap-1">
-              <span className="text-lg font-medium text-gray-900">{day.maxTemp}°</span>
-              <span className="text-sm text-gray-400">/ {day.minTemp}°</span>
+              <span className="text-lg font-medium text-gray-900 dark:text-white">{day.maxTemp}°</span>
+              <span className="text-sm text-gray-400 dark:text-gray-500">/ {day.minTemp}°</span>
             </div>
           </div>
         ))}
