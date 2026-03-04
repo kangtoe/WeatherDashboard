@@ -1,0 +1,201 @@
+import { useState } from 'react';
+import {
+  AreaChart, Area, BarChart, Bar,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList, ReferenceLine,
+} from 'recharts';
+import type { HourlyForecast as HourlyForecastData } from '../types/weather';
+import { getWindDirectionText } from '../types/weather';
+
+interface HourlyForecastProps {
+  data: HourlyForecastData[];
+}
+
+type Tab = 'temperature' | 'precipitation' | 'wind';
+
+const TABS: { key: Tab; label: string }[] = [
+  { key: 'temperature', label: '기온' },
+  { key: 'precipitation', label: '강수확률' },
+  { key: 'wind', label: '바람' },
+];
+
+function formatTimeLabel(time: string): string {
+  const h = parseInt(time.slice(0, 2), 10);
+  const ampm = h < 12 ? '오전' : '오후';
+  const h12 = h % 12 || 12;
+  return `${ampm} ${h12}시`;
+}
+
+function formatDateLabel(date: string): string {
+  const m = parseInt(date.slice(4, 6), 10);
+  const d = parseInt(date.slice(6, 8), 10);
+  return `${m}/${d}`;
+}
+
+export function HourlyForecast({ data }: HourlyForecastProps) {
+  const [tab, setTab] = useState<Tab>('temperature');
+
+  if (data.length === 0) return null;
+
+  const chartData = data.map((item) => ({
+    timeKey: `${item.date}_${item.time}`,
+    displayTime: formatTimeLabel(item.time),
+    temperature: item.temperature,
+    precipitation: item.precipitationProbability,
+    windSpeed: item.windSpeed,
+    windLabel: `${getWindDirectionText(item.windDirection)} ${item.windSpeed}`,
+  }));
+
+  // 날짜가 바뀌는 지점 찾기
+  const dateBoundaries = data
+    .filter((item, i) => i > 0 && item.date !== data[i - 1].date)
+    .map((item) => ({
+      timeKey: `${item.date}_${item.time}`,
+      label: formatDateLabel(item.date),
+    }));
+
+  const displayMap = new Map(chartData.map((d) => [d.timeKey, d.displayTime]));
+  const tickFormatter = (key: unknown) => displayMap.get(String(key)) ?? '';
+
+  const dateLines = dateBoundaries.map((b) => (
+    <ReferenceLine
+      key={b.timeKey}
+      x={b.timeKey}
+      stroke="#d1d5db"
+      strokeDasharray="4 4"
+      label={{ value: b.label, position: 'insideTopRight', fontSize: 10, fill: '#6b7280', fontWeight: 500 }}
+    />
+  ));
+
+  return (
+    <div className="bg-white rounded-2xl p-6 shadow-sm">
+      {/* 탭 */}
+      <div className="flex gap-2 mb-4">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer ${
+              tab === t.key
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* 차트 */}
+      <div className="h-48">
+        <ResponsiveContainer width="100%" height="100%">
+          {tab === 'temperature' ? (
+            <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 30, bottom: 0 }}>
+              <defs>
+                <linearGradient id="tempGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.3} />
+                  <stop offset="100%" stopColor="#f59e0b" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+              <XAxis
+                dataKey="timeKey"
+                tickFormatter={tickFormatter}
+                tick={{ fontSize: 11, fill: '#9ca3af' }}
+                axisLine={false}
+                tickLine={false}
+                interval={Math.max(0, Math.floor(chartData.length / 8) - 1)}
+              />
+              <YAxis hide domain={['dataMin - 3', 'dataMax + 3']} />
+              <Tooltip
+                labelFormatter={tickFormatter}
+                formatter={(value) => [`${value}°C`, '기온']}
+                contentStyle={{ borderRadius: '8px', fontSize: '12px' }}
+              />
+              {dateLines}
+              <Area
+                type="monotone"
+                dataKey="temperature"
+                stroke="#f59e0b"
+                strokeWidth={2}
+                fill="url(#tempGrad)"
+              >
+                <LabelList
+                  dataKey="temperature"
+                  position="top"
+                  formatter={(v) => `${v}°`}
+                  style={{ fontSize: 11, fill: '#6b7280' }}
+                />
+              </Area>
+            </AreaChart>
+          ) : tab === 'precipitation' ? (
+            <BarChart data={chartData} margin={{ top: 20, right: 30, left: 30, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+              <XAxis
+                dataKey="timeKey"
+                tickFormatter={tickFormatter}
+                tick={{ fontSize: 11, fill: '#9ca3af' }}
+                axisLine={false}
+                tickLine={false}
+                interval={Math.max(0, Math.floor(chartData.length / 8) - 1)}
+              />
+              <YAxis hide domain={[0, 100]} />
+              <Tooltip
+                labelFormatter={tickFormatter}
+                formatter={(value) => [`${value}%`, '강수확률']}
+                contentStyle={{ borderRadius: '8px', fontSize: '12px' }}
+              />
+              {dateLines}
+              <Bar dataKey="precipitation" fill="#3b82f6" radius={[4, 4, 0, 0]}>
+                <LabelList
+                  dataKey="precipitation"
+                  position="top"
+                  formatter={(v) => `${v}%`}
+                  style={{ fontSize: 11, fill: '#6b7280' }}
+                />
+              </Bar>
+            </BarChart>
+          ) : (
+            <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 30, bottom: 0 }}>
+              <defs>
+                <linearGradient id="windGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#6366f1" stopOpacity={0.3} />
+                  <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+              <XAxis
+                dataKey="timeKey"
+                tickFormatter={tickFormatter}
+                tick={{ fontSize: 11, fill: '#9ca3af' }}
+                axisLine={false}
+                tickLine={false}
+                interval={Math.max(0, Math.floor(chartData.length / 8) - 1)}
+              />
+              <YAxis hide domain={[0, 'dataMax + 2']} />
+              <Tooltip
+                labelFormatter={tickFormatter}
+                formatter={(value) => [`${value} m/s`, '풍속']}
+                contentStyle={{ borderRadius: '8px', fontSize: '12px' }}
+              />
+              {dateLines}
+              <Area
+                type="monotone"
+                dataKey="windSpeed"
+                stroke="#6366f1"
+                strokeWidth={2}
+                fill="url(#windGrad)"
+              >
+                <LabelList
+                  dataKey="windSpeed"
+                  position="top"
+                  formatter={(v) => `${v}`}
+                  style={{ fontSize: 11, fill: '#6b7280' }}
+                />
+              </Area>
+            </AreaChart>
+          )}
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}

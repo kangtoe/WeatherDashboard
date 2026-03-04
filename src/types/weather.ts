@@ -58,6 +58,49 @@ export const CITIES: Location[] = [
   { name: '제주', nx: 52, ny: 38 },
 ];
 
+// 가공된 시간별 예보 데이터
+export interface HourlyForecast {
+  date: string;
+  time: string;
+  temperature: number;
+  humidity: number;
+  sky: number;
+  precipitationType: number;
+  precipitationProbability: number;
+  windSpeed: number;
+  windDirection: number;
+}
+
+// 가공된 일별 예보 데이터
+export interface DailyForecast {
+  date: string;
+  dayOfWeek: string;
+  minTemp: number;
+  maxTemp: number;
+  sky: number;
+  precipitationType: number;
+  precipitationProbability?: number;
+  avgWindSpeed?: number;
+  avgHumidity?: number;
+}
+
+// 요일 텍스트
+const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
+
+export function getDayOfWeek(dateStr: string): string {
+  const y = parseInt(dateStr.slice(0, 4), 10);
+  const m = parseInt(dateStr.slice(4, 6), 10) - 1;
+  const d = parseInt(dateStr.slice(6, 8), 10);
+  return DAY_NAMES[new Date(y, m, d).getDay()];
+}
+
+// 하늘상태 코드 → 텍스트
+export const SKY_TEXT: Record<number, string> = {
+  1: '맑음',
+  3: '구름많음',
+  4: '흐림',
+};
+
 // 강수형태 코드 → 텍스트
 export const PTY_TEXT: Record<number, string> = {
   0: '없음',
