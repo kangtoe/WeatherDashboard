@@ -13,7 +13,7 @@ export function LocationSelector({ selected, onSelect }: LocationSelectorProps) 
         <button
           key={city.name}
           onClick={() => onSelect(city)}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer ${
+          className={`px-4 py-2 min-h-11 rounded-full text-sm font-medium transition-colors cursor-pointer ${
             selected.name === city.name
               ? 'bg-blue-500 text-white'
               : 'bg-white text-gray-700 hover:bg-blue-100'

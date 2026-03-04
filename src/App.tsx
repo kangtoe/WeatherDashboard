@@ -39,15 +39,15 @@ function App() {
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
       <header className="bg-white shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="w-8" />
+        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
+          <div className="w-11 sm:w-8" />
           <h1 className="text-xl font-bold text-gray-900">
             Weather Dashboard
           </h1>
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 disabled:opacity-50 cursor-pointer"
+            className="w-11 h-11 sm:w-8 sm:h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 disabled:opacity-50 cursor-pointer"
             title="새로고침"
           >
             <svg
@@ -67,7 +67,7 @@ function App() {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-6 space-y-4">
+      <main className="max-w-3xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-3 sm:space-y-4">
         {/* 지역 선택 */}
         <LocationSelector selected={location} onSelect={setLocation} />
 

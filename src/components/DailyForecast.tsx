@@ -32,13 +32,13 @@ export function DailyForecast({ data }: DailyForecastProps) {
   const today = getTodayStr();
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm">
-      <h3 className="text-sm font-medium text-gray-500 mb-4">일별 예보</h3>
-      <div className="flex gap-3">
+    <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm">
+      <h3 className="text-sm font-medium text-gray-500 mb-3 sm:mb-4">일별 예보</h3>
+      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:pb-0 sm:overflow-x-visible">
         {data.map((day) => (
           <div
             key={day.date}
-            className={`flex-1 flex flex-col items-center gap-2 rounded-xl p-4 ${
+            className={`min-w-20 flex-shrink-0 sm:flex-1 sm:min-w-0 sm:flex-shrink flex flex-col items-center gap-2 rounded-xl p-3 sm:p-4 ${
               day.date === today ? 'bg-blue-50' : 'bg-gray-50'
             }`}
           >

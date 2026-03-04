@@ -45,22 +45,22 @@ export function CurrentWeather({ data, location, precipitationProbability, sky }
   const weatherText = getWeatherText(displaySky, data.precipitationType);
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm">
-      <div className="flex items-start justify-between">
+    <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-5xl">{weatherIcon}</span>
+          <span className="text-4xl sm:text-5xl">{weatherIcon}</span>
           <div className="flex items-baseline">
-            <span className="text-5xl font-light text-gray-900">{data.temperature}</span>
+            <span className="text-4xl sm:text-5xl font-light text-gray-900">{data.temperature}</span>
             <span className="text-xl text-gray-400 ml-1">°C</span>
           </div>
         </div>
-        <div className="text-right">
+        <div className="sm:text-right">
           <p className="text-lg font-medium text-gray-900">{location.name}</p>
           <p className="text-sm text-gray-400">{dayStr} {timeStr}</p>
           <p className="text-sm text-gray-600 mt-1">{weatherText}</p>
         </div>
       </div>
-      <div className="flex gap-4 mt-4 pt-4 border-t border-gray-100 text-sm text-gray-500">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-4 pt-4 border-t border-gray-100 text-sm text-gray-500">
         {precipitationProbability != null && (
           <span>강수확률 {precipitationProbability}%</span>
         )}
